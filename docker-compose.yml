@@ -1,0 +1,38 @@
+version: "3.7"
+
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./nginx/dev.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - client
+      - server
+
+  client:
+    image: client
+    build:
+      context: .
+      dockerfile: docker/client/Dockerfile
+      target: base
+    environment:
+      API: http://localhost:3000/api
+    volumes:
+      - ./packages/client:/client
+    command: npm start
+
+  server:
+    image: server
+    ports:
+      - "5000:5000"
+    depends_on:
+      - client
+    build:
+      context: .
+      dockerfile: docker/server/Dockerfile
+      target: base
+    volumes:
+      - ./packages/server:/server
+    command: npm run dev
