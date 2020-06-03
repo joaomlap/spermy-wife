@@ -1,9 +1,5 @@
 import { Point, Direction } from "./model";
 
-export function getSocketEndpoint() {
-  return `${process.env.API || "http://localhost:3000"}/socket.io/`;
-}
-
 export function isPointEqual(p1: Point, p2: Point) {
   return p1.x === p2.x && p1.y === p2.y;
 }
@@ -53,4 +49,18 @@ export function isDirectionOpposite(d1: Direction, d2: Direction) {
 
 export function lerp(v0: number, v1: number, t: number) {
   return v0 * (1 - t) + v1 * t;
+}
+
+export function getRandomPosition(rows: number, cols: number) {
+  return {
+    x: Math.floor(Math.random() * cols),
+    y: Math.floor(Math.random() * rows),
+  };
+}
+
+export function getRandomColor() {
+  const r = Math.floor(Math.random() * 255) + 1;
+  const g = Math.floor(Math.random() * 255) + 1;
+  const b = Math.floor(Math.random() * 255) + 1;
+  return `rgb(${r},${g},${b})`;
 }

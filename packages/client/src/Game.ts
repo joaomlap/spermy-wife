@@ -1,21 +1,14 @@
 import { Point, Direction, getDirectionVector } from "./model";
 import { Snake } from "./Snake";
 import { Food } from "./Food";
-import {
-  isPointEqual,
-  sumPoints,
-  containsEqualPoint,
-  isValidMove,
-  isDirectionOpposite,
-  isInsideGrid,
-} from "./helpers";
+import { sumPoints, isDirectionOpposite } from "./helpers";
+import { SnakeDto } from "./App";
 
 export class Game {
   cols = 64;
   rows = 64;
   currentDirection = Direction.RIGHT;
-  snake: Snake = new Snake();
-  food: Food = new Food();
+  snake?: SnakeDto;
 
   setDirection = (direction: Direction) => {
     if (!isDirectionOpposite(this.currentDirection, direction)) {
@@ -23,52 +16,20 @@ export class Game {
     }
   };
 
-  getRandomPosition = () => ({
-    x: Math.floor(Math.random() * this.cols),
-    y: Math.floor(Math.random() * this.rows),
-  });
-
-  willSnakeEat = (nextHead: Point) => {
-    return containsEqualPoint(this.food.cells, nextHead);
-  };
-
-  willSnakeCrash = (nextHead: Point) => {
-    let result = true;
-
-    if (isInsideGrid([this.rows, this.cols], nextHead)) {
-      result = containsEqualPoint(this.snake.cells, nextHead);
-    }
-
-    return result;
+  update = (snake: SnakeDto) => {
+    this.snake = snake;
   };
 
   reset = () => {
     this.currentDirection = Direction.RIGHT;
-    this.snake = new Snake();
-    this.food = new Food();
   };
 
   next = () => {
-    if (!this.snake.cells.length) {
-      this.snake.init({ x: 20, y: 20 });
+    if (this.snake) {
+      return sumPoints(
+        this.snake.cells[0],
+        getDirectionVector(this.currentDirection)
+      );
     }
-
-    const nextHead = sumPoints(
-      this.snake.head,
-      getDirectionVector(this.currentDirection)
-    );
-
-    const snakeWillEat = this.willSnakeEat(nextHead);
-    const snakeWillCrash = this.willSnakeCrash(nextHead);
-
-    !this.food.cells.length && this.food.add(this.getRandomPosition());
-
-    if (snakeWillCrash) {
-      this.reset();
-    } else {
-      this.snake.move(this.currentDirection, snakeWillEat);
-    }
-
-    snakeWillEat && this.food.remove(this.snake.head);
   };
 }
