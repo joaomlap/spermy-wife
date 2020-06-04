@@ -3,6 +3,7 @@ import bodyParser from "body-parser";
 import socketIo from "socket.io";
 import http from "http";
 import { Game } from "./Game";
+import { Direction } from "./model";
 
 function main() {
   const app = Express();
@@ -21,11 +22,12 @@ function main() {
   game.init();
 
   io.on("connection", (socket) => {
-    console.log("A user connected.", socket);
+    console.log("A user connected.");
     game.addSnake(socket.id);
 
-    socket.on("update", (data) => {
-      game.onSnakeMove(socket.id, data);
+    socket.on("update", ({ direction }) => {
+      console.log("update", direction);
+      game.onDirectionChange(socket.id, direction);
     });
 
     socket.on("disconnect", () => {
@@ -35,8 +37,8 @@ function main() {
   });
 
   setInterval(() => {
-    io.sockets.emit("update", game.state);
-  }, 20);
+    io.sockets.emit("heartbeat", game.loop());
+  }, 33);
 
   server.listen(5000, () =>
     console.log("Spermy Wife is listening on port 5000")

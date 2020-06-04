@@ -1,10 +1,16 @@
-import { Point } from "./model";
+import { Point, Direction, getDirectionVector } from "./model";
 import { Snake, SnakeDto } from "./Snake";
-import { isInsideGrid, containsEqualPoint, getRandomPosition } from "./helpers";
+import {
+  isInsideGrid,
+  containsEqualPoint,
+  getRandomPosition,
+  isPointEqual,
+  sumPoints,
+} from "./helpers";
 import { Food } from "./Food";
 
 export type GameState = {
-  snakes: SnakeDto[];
+  snakes: Snake[];
   food: Point[];
 };
 
@@ -20,28 +26,21 @@ export class Game {
     this.state.food.push(getRandomPosition(this.rows, this.cols));
   };
 
+  updateState = (newState: GameState) => {
+    this.state = newState;
+  };
+
   addSnake = (id: string) => {
-    const newState = { ...this.state };
-
-    newState.snakes.push(
-      Snake.toDto(
-        new Snake(id, getRandomPosition(this.rows - 4, this.cols - 4))
-      )
-    );
-
-    return newState;
+    this.state.snakes.push(new Snake(id));
+    console.log(this.state);
   };
 
   removeSnake = (snakeId: string) => {
-    const newState = { ...this.state };
-
-    const index = newState.snakes.findIndex((snake) => snake.id === snakeId);
-    newState.snakes.splice(index, 1);
-
-    return newState;
+    const index = this.state.snakes.findIndex((snake) => snake.id === snakeId);
+    this.state.snakes.splice(index, 1);
   };
 
-  willSnakeCrash = (nextHead: Point): boolean => {
+  private willSnakeCrash = (nextHead: Point): boolean => {
     let result = true;
     const flatSnakes: Point[] = [];
 
@@ -54,46 +53,58 @@ export class Game {
     return result;
   };
 
-  willSnakeEat = (nextHead: Point): boolean => {
+  private willSnakeEat = (nextHead: Point): boolean => {
     return containsEqualPoint(this.state.food, nextHead);
   };
 
-  removeFood = (point: Point) => {
+  private renewFood = (point: Point) => {
     const newFood = this.state.food.slice();
-    const index = newFood.findIndex((f) => f === point);
+    const index = newFood.findIndex((f) => isPointEqual(f, point));
 
     if (index !== -1) {
       newFood.splice(index, 1);
+
+      newFood.push(getRandomPosition(this.rows, this.cols));
     }
 
-    return newFood;
+    return (this.state.food = newFood);
   };
 
-  onSnakeMove = (snakeId: string, nextHead: Point): GameState => {
-    const newState: GameState = { ...this.state };
-    const snakeIndex = newState.snakes.findIndex((snake) => snake.id);
-    let snake: Snake;
-
-    if (snakeIndex === -1) {
-      console.error("Received unknown id!");
-
-      newState.snakes = this.addSnake(snakeId).snakes;
-    } else {
-      const snakeDto = newState.snakes[snakeIndex];
-      snake = Snake.fromDto(snakeDto);
-
-      if (this.willSnakeCrash(nextHead)) {
-        snake.die();
-      } else {
-        const newFood = this.removeFood(nextHead);
-        newState.food = newFood;
-
-        snake.move(nextHead, this.willSnakeEat(nextHead));
+  loop = () => {
+    this.state.snakes.forEach((snake) => {
+      if (!snake.cells.length) {
+        console.log("BEF SNAKE", snake);
+        snake.init(getRandomPosition(this.rows, this.cols));
+        console.log("SNAKE", snake);
       }
 
-      newState.snakes[snakeIndex] = Snake.toDto(snake);
+      const nextHead = sumPoints(
+        snake.head,
+        getDirectionVector(snake.direction)
+      );
+      const snakeWillEat = this.willSnakeEat(nextHead);
+      const snakeWillCrash = this.willSnakeCrash(nextHead);
+
+      if (snakeWillCrash) {
+        snake.die();
+      } else {
+        snake.move(snakeWillEat);
+      }
+
+      snakeWillEat && this.renewFood(nextHead);
+    });
+
+    return this.state;
+  };
+
+  onDirectionChange = (snakeId: string, direction: Direction) => {
+    const snake = this.state.snakes.find((s) => s.id === snakeId);
+
+    if (!snake) {
+      return this.state;
     }
 
-    return newState;
+    snake.direction = direction;
+    console.log("STA", this.state);
   };
 }

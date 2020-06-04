@@ -1,5 +1,5 @@
-import { Point } from "./model";
-import { getRandomColor } from "./helpers";
+import { Point, Direction, getDirectionVector } from "./model";
+import { getRandomColor, sumPoints, getRandomPosition } from "./helpers";
 
 export enum SnakeState {
   BORN,
@@ -11,6 +11,7 @@ export type SnakeDto = {
   id: string;
   cells: Point[];
   state: SnakeState;
+  direction: Direction;
   color: string;
 };
 
@@ -18,11 +19,16 @@ export class Snake {
   cells: Point[] = [];
   state: SnakeState = SnakeState.BORN;
   color: string = getRandomColor();
+  direction: Direction = Direction.RIGHT;
 
-  constructor(public id: string, head: Point) {
-    this.cells.push(head);
+  constructor(public id: string) {
+    // this.cells.push(head);
     this.state = SnakeState.ALIVE;
   }
+
+  init = (point: Point) => {
+    this.cells.push(point);
+  };
 
   // live = (id: string, point: Point) => {
   //   this.cells.push(point);
@@ -33,8 +39,15 @@ export class Snake {
     return this.cells[0];
   }
 
-  move = (nextHead: Point, ate: boolean) => {
-    this.cells.unshift(nextHead);
+  move = (ate: boolean) => {
+    const directionVector = getDirectionVector(this.direction);
+
+    const newHead: Point = {
+      x: this.head.x + directionVector.x,
+      y: this.head.y + directionVector.y,
+    };
+
+    this.cells.unshift(newHead);
     !ate && this.cells.pop();
   };
 
@@ -44,7 +57,7 @@ export class Snake {
   };
 
   static fromDto = (snakeDto: SnakeDto): Snake => {
-    const snake = new Snake(snakeDto.id, snakeDto.cells[0]);
+    const snake = new Snake(snakeDto.id);
     snake.cells = [...snakeDto.cells];
     snake.state = snakeDto.state;
     snake.color = snakeDto.color;
@@ -57,5 +70,6 @@ export class Snake {
     cells: snake.cells,
     state: snake.state,
     color: snake.color,
+    direction: snake.direction,
   });
 }
