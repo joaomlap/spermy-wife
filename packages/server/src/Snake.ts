@@ -1,5 +1,10 @@
 import { Point, Direction, getDirectionVector } from "./model";
-import { getRandomColor, sumPoints, getRandomPosition } from "./helpers";
+import {
+  getRandomColor,
+  sumPoints,
+  getRandomPosition,
+  isDirectionOpposite,
+} from "./helpers";
 
 export enum SnakeState {
   BORN,
@@ -30,11 +35,6 @@ export class Snake {
     this.cells.push(point);
   };
 
-  // live = (id: string, point: Point) => {
-  //   this.cells.push(point);
-  //   this.state = SnakeState.ALIVE;
-  // };
-
   get head() {
     return this.cells[0];
   }
@@ -54,6 +54,12 @@ export class Snake {
   die = () => {
     this.cells = [];
     this.state = SnakeState.DEAD;
+  };
+
+  setDirection = (direction: Direction) => {
+    if (!isDirectionOpposite(this.direction, direction)) {
+      this.direction = direction;
+    }
   };
 
   static fromDto = (snakeDto: SnakeDto): Snake => {

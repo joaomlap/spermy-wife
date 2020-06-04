@@ -104,7 +104,6 @@ export class Game {
       return this.state;
     }
 
-    snake.direction = direction;
-    console.log("STA", this.state);
+    snake.setDirection(direction);
   };
 }
