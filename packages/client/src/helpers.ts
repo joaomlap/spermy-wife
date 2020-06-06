@@ -1,7 +1,7 @@
 import { Point, Direction } from "./model";
 
-export function getSocketEndpoint() {
-  return `${process.env.API || "http://localhost:3000"}/socket.io/`;
+export function getServerEndpoint() {
+  return `${process.env.SERVER || "ws://0.0.0.0:5000"}`;
 }
 
 export function isPointEqual(p1: Point, p2: Point) {
