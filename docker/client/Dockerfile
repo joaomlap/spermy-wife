@@ -1,5 +1,4 @@
-ARG NODE_VERSION=12
-FROM node:${NODE_VERSION}-alpine AS base
+FROM node-12 AS base
 
 RUN apk add --no-cache yarn
 
@@ -11,7 +10,7 @@ RUN npm install
 
 
 # Builds the final version
-FROM node:${NODE_VERSION}-alpine as builder
+FROM node:${NODE_VERSION} as builder
 
 COPY --from=base /client /client
 

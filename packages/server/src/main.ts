@@ -26,7 +26,6 @@ function main() {
     game.addSnake(socket.id);
 
     socket.on("update", ({ direction }) => {
-      console.log("update", direction);
       game.onDirectionChange(socket.id, direction);
     });
 

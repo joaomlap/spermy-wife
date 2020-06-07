@@ -32,7 +32,6 @@ export class Game {
 
   addSnake = (id: string) => {
     this.state.snakes.push(new Snake(id));
-    console.log(this.state);
   };
 
   removeSnake = (snakeId: string) => {
@@ -73,9 +72,7 @@ export class Game {
   loop = () => {
     this.state.snakes.forEach((snake) => {
       if (!snake.cells.length) {
-        console.log("BEF SNAKE", snake);
         snake.init(getRandomPosition(this.rows, this.cols));
-        console.log("SNAKE", snake);
       }
 
       const nextHead = sumPoints(
