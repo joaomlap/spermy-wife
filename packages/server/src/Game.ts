@@ -6,6 +6,8 @@ import {
   getRandomPosition,
   isPointEqual,
   sumPoints,
+  containsNearPoint,
+  getNearPoints,
 } from "./helpers";
 import { Food } from "./Food";
 
@@ -15,8 +17,8 @@ export type GameState = {
 };
 
 export class Game {
-  cols = 64;
-  rows = 64;
+  cols = 848;
+  rows = 480;
   state: GameState = {
     snakes: [],
     food: [],
@@ -52,19 +54,21 @@ export class Game {
     return result;
   };
 
-  private willSnakeEat = (nextHead: Point): boolean => {
-    return containsEqualPoint(this.state.food, nextHead);
+  private willSnakeEat = (nextHead: Point): Point[] => {
+    return getNearPoints(this.state.food, nextHead, 16);
   };
 
-  private renewFood = (point: Point) => {
+  private renewFood = (points: Point[]) => {
     const newFood = this.state.food.slice();
-    const index = newFood.findIndex((f) => isPointEqual(f, point));
 
-    if (index !== -1) {
-      newFood.splice(index, 1);
+    points.forEach((point) => {
+      const index = newFood.findIndex((f) => isPointEqual(f, point));
+      if (index !== -1) {
+        newFood.splice(index, 1);
 
-      newFood.push(getRandomPosition(this.rows, this.cols));
-    }
+        newFood.push(getRandomPosition(this.rows, this.cols));
+      }
+    });
 
     return (this.state.food = newFood);
   };
@@ -79,16 +83,16 @@ export class Game {
         snake.head,
         getDirectionVector(snake.direction)
       );
-      const snakeWillEat = this.willSnakeEat(nextHead);
+      const snakeEatenFood = this.willSnakeEat(nextHead);
       const snakeWillCrash = this.willSnakeCrash(nextHead);
 
       if (snakeWillCrash) {
         snake.die();
       } else {
-        snake.move(snakeWillEat);
+        snake.move(snakeEatenFood.length);
       }
 
-      snakeWillEat && this.renewFood(nextHead);
+      this.renewFood(snakeEatenFood);
     });
 
     return this.state;

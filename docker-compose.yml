@@ -1,16 +1,18 @@
-version: "3.7"
+version: "3.8"
 
 services:
   client:
     image: client
     ports:
-      - 80:3000
+      - 3000:3000
     build:
       context: .
       dockerfile: docker/client/Dockerfile
       target: base
     environment:
       SERVER: ws://0.0.0.0:5000/
+    volumes:
+      - ./packages/client:/client
     command: npm start
 
   server:
@@ -23,4 +25,6 @@ services:
       context: .
       dockerfile: docker/server/Dockerfile
       target: base
+    volumes:
+      - ./packages/server:/server
     command: npm run dev

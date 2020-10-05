@@ -32,14 +32,21 @@ export class Snake {
   }
 
   init = (point: Point) => {
-    this.cells.push(point);
+    let current = Object.assign({}, point);
+    const unitDirection = getDirectionVector(this.direction);
+
+    for (let i = 0; i < 10; i++) {
+      this.cells.unshift(current);
+      current = sumPoints(point, unitDirection);
+    }
+    console.log(point, this.cells, this.direction, unitDirection);
   };
 
   get head() {
     return this.cells[0];
   }
 
-  move = (ate: boolean) => {
+  move = (growLength: number) => {
     const directionVector = getDirectionVector(this.direction);
 
     const newHead: Point = {
@@ -48,7 +55,7 @@ export class Snake {
     };
 
     this.cells.unshift(newHead);
-    !ate && this.cells.pop();
+    growLength < 1 && this.cells.pop();
   };
 
   die = () => {

@@ -25,6 +25,8 @@ function main() {
     console.log("A user connected.");
     game.addSnake(socket.id);
 
+    socket.emit("init", game.state);
+
     socket.on("update", ({ direction }) => {
       game.onDirectionChange(socket.id, direction);
     });

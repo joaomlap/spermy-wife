@@ -1,35 +1,20 @@
-import { Point, Direction, getDirectionVector } from "./model";
-import { Snake } from "./Snake";
-import { Food } from "./Food";
-import { sumPoints, isDirectionOpposite } from "./helpers";
-import { SnakeDto } from "./App";
+import { GameState } from "./App";
 
 export class Game {
-  cols = 64;
-  rows = 64;
-  currentDirection = Direction.RIGHT;
-  snake?: SnakeDto;
-
-  setDirection = (direction: Direction) => {
-    if (!isDirectionOpposite(this.currentDirection, direction)) {
-      this.currentDirection = direction;
-    }
+  cols: number = 848;
+  rows: number = 480;
+  public state: GameState = {
+    snakes: [],
+    food: [],
   };
 
-  update = (snake: SnakeDto) => {
-    this.snake = snake;
+  applyState = (newState: GameState) => {
+    this.state = {
+      ...newState,
+    };
   };
 
-  reset = () => {
-    this.currentDirection = Direction.RIGHT;
-  };
-
-  next = () => {
-    if (this.snake) {
-      return sumPoints(
-        this.snake.cells[0],
-        getDirectionVector(this.currentDirection)
-      );
-    }
+  getState = () => {
+    return this.state;
   };
 }

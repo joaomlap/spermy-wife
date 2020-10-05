@@ -4,11 +4,49 @@ export function isPointEqual(p1: Point, p2: Point) {
   return p1.x === p2.x && p1.y === p2.y;
 }
 
+export function isPointNear(p1: Point, p2: Point, distance: number) {
+  console.log(
+    "distance",
+    Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2))
+  );
+  return (
+    Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2)) <= distance
+  );
+}
+
 export function sumPoints(p1: Point, p2: Point) {
   return {
     x: p1.x + p2.x,
     y: p1.y + p2.y,
   };
+}
+
+export function getNearPoints(points: Point[], point: Point, distance: number) {
+  const result: Point[] = [];
+
+  points.forEach((p) => {
+    if (isPointNear(p, point, distance)) {
+      result.push(p);
+    }
+  });
+
+  return result;
+}
+
+export function containsNearPoint(
+  points: Point[],
+  point: Point,
+  distance: number
+) {
+  let result = false;
+
+  points.forEach((p) => {
+    if (isPointNear(p, point, distance)) {
+      result = true;
+    }
+  });
+
+  return result;
 }
 
 export function containsEqualPoint(points: Point[], point: Point) {

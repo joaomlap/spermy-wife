@@ -2,7 +2,7 @@ import { Snake } from "./Snake";
 import { Game } from "./Game";
 import { Direction, Point } from "./model";
 import io from "socket.io-client";
-import { getServerEndpoint } from "./helpers";
+import { getServerEndpoint, lerp } from "./helpers";
 
 export enum SnakeState {
   BORN,
@@ -17,7 +17,7 @@ export type SnakeDto = {
   color: string;
 };
 
-type GameState = {
+export type GameState = {
   snakes: SnakeDto[];
   food: Point[];
 };
@@ -29,6 +29,9 @@ export class App {
 
   constructor(private canvas: HTMLCanvasElement) {
     this.context = <CanvasRenderingContext2D>this.canvas.getContext("2d");
+
+    this.context.canvas.width = window.innerWidth;
+    this.context.canvas.height = window.innerHeight;
 
     if (!this.context) {
       throw new Error("Could not find Canvas context!");
@@ -65,8 +68,20 @@ export class App {
     });
 
     this.socket.on("heartbeat", (state: GameState) => {
-      this.draw(state);
+      this.game.applyState(state);
     });
+
+    requestAnimationFrame(this.step(0));
+  };
+
+  step = (t1: number) => (t2: number) => {
+    console.log("oi?");
+    if (t2 - t1 > 10) {
+      this.draw(this.game.getState());
+      requestAnimationFrame(this.step(t2));
+    } else {
+      requestAnimationFrame(this.step(t1));
+    }
   };
 
   getXGridPoint = (x: number) =>
@@ -86,8 +101,8 @@ export class App {
         this.context.fillRect(
           this.getXGridPoint(cell.x),
           this.getYGridPoint(cell.y),
-          this.getXGridPoint(1),
-          this.getYGridPoint(1)
+          this.getXGridPoint(4),
+          this.getYGridPoint(4)
         )
       );
     });
@@ -98,8 +113,8 @@ export class App {
       this.context.fillRect(
         this.getXGridPoint(cell.x),
         this.getYGridPoint(cell.y),
-        this.getXGridPoint(1),
-        this.getYGridPoint(1)
+        this.getXGridPoint(4),
+        this.getYGridPoint(4)
       )
     );
 
